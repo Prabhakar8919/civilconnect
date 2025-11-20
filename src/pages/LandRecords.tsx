@@ -10,12 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { useBackground } from "@/context/BackgroundContext";
 import { LandListing } from "@/integrations/supabase/types";
 import { User } from "@supabase/supabase-js";
+import { LandViewModal } from "@/components/LandViewModal";
 
 const LandRecords = () => {
   const [lands, setLands] = useState<LandListing[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [connections, setConnections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedLand, setSelectedLand] = useState<any>(null);
+  const [showLandModal, setShowLandModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -267,6 +270,17 @@ const LandRecords = () => {
                 {/* Action Buttons - Only show if not own listing */}
                 {user && user.id !== land.owner_id ? (
                   <div className="space-y-2">
+                    {/* View Details Button */}
+                    <Button
+                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold shadow-xl transition-all py-6"
+                      onClick={() => {
+                        setSelectedLand(land);
+                        setShowLandModal(true);
+                      }}
+                    >
+                      View Details
+                    </Button>
+
                     {/* Chat Button */}
                     <Button
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-xl hover:shadow-blue-500/50 transition-all py-6"
@@ -332,6 +346,16 @@ const LandRecords = () => {
           )}
         </div>
       </div>
+
+      {/* Land View Modal */}
+      {selectedLand && (
+        <LandViewModal
+          open={showLandModal}
+          onOpenChange={setShowLandModal}
+          land={selectedLand}
+          onChatWithOwner={() => handleChat(selectedLand.owner_id)}
+        />
+      )}
     </div>
   );
 };

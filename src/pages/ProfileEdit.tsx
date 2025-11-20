@@ -15,6 +15,7 @@ import MultiImageUpload from "@/components/MultiImageUpload";
 import Navigation from "@/components/Navigation";
 import { AddressInputSection } from "@/components/AddressInputSection";
 import { AddressFields } from "@/lib/addressUtils";
+import { PasswordChangeForm } from "@/components/PasswordChangeForm";
 
 const ProfileEdit = () => {
   const [loading, setLoading] = useState(true);
@@ -268,10 +269,14 @@ const ProfileEdit = () => {
           </div>
 
           <Tabs defaultValue="profile" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-2 h-14 p-1.5 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm">
+            <TabsList className="grid w-full grid-cols-3 h-14 p-1.5 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm">
               <TabsTrigger value="profile" className="h-full text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <User className="h-5 w-5 mr-2" />
                 Profile
+              </TabsTrigger>
+              <TabsTrigger value="security" className="h-full text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Building2 className="h-5 w-5 mr-2" />
+                Change Password
               </TabsTrigger>
               <TabsTrigger value="land" className="h-full text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <MapPin className="h-5 w-5 mr-2" />
@@ -544,6 +549,11 @@ const ProfileEdit = () => {
                   </Button>
                 </div>
               </form>
+            </TabsContent>
+
+            {/* Security Tab */}
+            <TabsContent value="security">
+              <PasswordChangeForm userEmail={profile.email} />
             </TabsContent>
 
             {/* Land Listings Tab */}

@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Mail, Lock, User, Sparkles, CheckCircle2, Shield, Users, Phone, MapPin, Eye, EyeOff } from "lucide-react";
+import { PasswordInput } from "@/components/PasswordInput";
+import { validatePassword } from "@/lib/passwordValidation";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -47,6 +49,18 @@ const Auth = () => {
 
     try {
       if (isLogin) {
+        // Validate password for login too
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+          toast({
+            title: "Invalid Password Format",
+            description: "Please check your password and try again.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -68,6 +82,18 @@ const Auth = () => {
           toast({
             title: "Error",
             description: "Please select a user type",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Validate password
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+          toast({
+            title: "Password does not meet requirements",
+            description: passwordValidation.errors[0],
             variant: "destructive",
           });
           setLoading(false);
@@ -286,43 +312,55 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="flex items-center gap-2">
-                      <Lock className="h-4 w-4 text-primary" />
-                      Password
-                    </Label>
-                    {isLogin && (
+                  {isLogin && (
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="password" className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-primary" />
+                        Password
+                      </Label>
                       <Link
                         to="/password-reset"
                         className="text-xs text-primary hover:underline transition-all"
                       >
                         Forgot Password?
                       </Link>
-                    )}
-                  </div>
-                  <div className="relative">
-                    <Input
+                    </div>
+                  )}
+                  {isLogin ? (
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="border-border/50 focus:border-primary transition-all focus:shadow-lg focus:shadow-primary/20 pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <PasswordInput
                       id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
+                      label="Password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="border-border/50 focus:border-primary transition-all focus:shadow-lg focus:shadow-primary/20 pr-10"
+                      onChange={setPassword}
+                      placeholder="Create a strong password"
+                      showValidation={true}
+                      required={true}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+                  )}
                 </div>
 
                 {!isLogin && (
@@ -343,7 +381,6 @@ const Auth = () => {
                         <SelectItem value="worker">Civil Worker</SelectItem>
                         <SelectItem value="material_seller">Material Seller</SelectItem>
                         <SelectItem value="land_owner">Land Owner</SelectItem>
-                        <SelectItem value="buyer">Property Buyer</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

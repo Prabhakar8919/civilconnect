@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Users, Building2, Hammer, Home, ShoppingBag, User, MapPin, Maximize2 } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { LandViewModal } from "@/components/LandViewModal";
 
 const Services = () => {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -18,6 +19,8 @@ const Services = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [connections, setConnections] = useState<any[]>([]);
+  const [selectedLand, setSelectedLand] = useState<any>(null);
+  const [showLandModal, setShowLandModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -162,6 +165,65 @@ const Services = () => {
     }
   };
 
+  const handleViewLandDetails = (land: any) => {
+    setSelectedLand(land);
+    setShowLandModal(true);
+  };
+
+  const renderLandCard = (land: any) => (
+    <Card key={land.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+      <CardHeader className="p-0">
+        {land.images && land.images.length > 0 ? (
+          <img
+            src={land.images[0]}
+            alt={land.title}
+            className="w-full h-48 object-cover"
+          />
+        ) : (
+          <div className="w-full h-48 bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
+            <Home className="h-16 w-16 text-green-600 opacity-50" />
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="p-4">
+        <h3 className="font-bold text-lg mb-2 line-clamp-1">{land.title}</h3>
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-4 w-4" />
+            <span className="line-clamp-1">{land.city}, {land.state}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Maximize2 className="h-4 w-4 text-muted-foreground" />
+            <span className="font-semibold">{land.area_sqft} sq ft</span>
+          </div>
+          <div className="flex items-center justify-between pt-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Total Price</p>
+              <p className="text-xl font-bold text-primary">₹{land.price.toLocaleString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Per sq ft</p>
+              <p className="text-sm font-semibold">₹{land.price_per_sqft}</p>
+            </div>
+          </div>
+        </div>
+        {land.status && (
+          <Badge className="mt-3" variant={land.status === 'active' ? 'default' : 'secondary'}>
+            {land.status}
+          </Badge>
+        )}
+      </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <Button 
+          className="w-full" 
+          onClick={() => handleViewLandDetails(land)}
+        >
+          View Details
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
@@ -277,7 +339,7 @@ const Services = () => {
                             <CardFooter className="p-4 pt-0">
                               <Button 
                                 className="w-full" 
-                                onClick={() => navigate(`/land/${land.id}`)}
+                                onClick={() => handleViewLandDetails(land)}
                               >
                                 View Details
                               </Button>
@@ -384,7 +446,7 @@ const Services = () => {
                             <CardFooter className="p-4 pt-0">
                               <Button 
                                 className="w-full" 
-                                onClick={() => navigate(`/land/${land.id}`)}
+                                onClick={() => handleViewLandDetails(land)}
                               >
                                 View Details
                               </Button>
@@ -415,6 +477,22 @@ const Services = () => {
       </main>
 
       <Footer />
+
+      {/* Land View Modal */}
+      {selectedLand && (
+        <LandViewModal
+          open={showLandModal}
+          onOpenChange={setShowLandModal}
+          land={selectedLand}
+          onChatWithOwner={() => {
+            // TODO: Implement chat with owner functionality
+            toast({
+              title: "Chat Feature",
+              description: "Chat with owner feature coming soon!",
+            });
+          }}
+        />
+      )}
     </div>
   );
 };

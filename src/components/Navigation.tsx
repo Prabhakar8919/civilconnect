@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ const Navigation = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -64,15 +65,22 @@ const Navigation = () => {
 
             {/* Primary Links - visible next to logo on desktop */}
             <div className="hidden md:flex items-center space-x-1 ml-4 flex-1">
-              {primaryLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent/50 rounded-md transition-all relative group"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {primaryLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-all relative group ${
+                      isActive 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'text-foreground/80 hover:text-foreground hover:bg-accent/50'
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Actions - Right Side */}
