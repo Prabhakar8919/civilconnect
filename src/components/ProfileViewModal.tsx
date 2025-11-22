@@ -185,7 +185,12 @@ export const ProfileViewModal = ({
                 </div>
               )}
               
-              <Badge className="mb-3 text-sm font-semibold bg-blue-600 text-white">{profile.user_type.replace('_', ' ').toUpperCase()}</Badge>
+              <div className="flex flex-wrap gap-2 mb-3 justify-center sm:justify-start">
+                <Badge className="text-sm font-semibold bg-blue-600 text-white">{profile.user_type.replace('_', ' ').toUpperCase()}</Badge>
+                {profile.user_type === 'worker' && profile.profession && (
+                  <Badge className="text-sm font-semibold bg-green-600 text-white">{profile.profession.replace('_', ' ').toUpperCase()}</Badge>
+                )}
+              </div>
               <div className="flex flex-wrap gap-3 justify-center sm:justify-start text-sm mb-3">
                 <div className="flex items-start gap-1 text-gray-700 dark:text-gray-300 font-medium">
                   <MapPin className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />

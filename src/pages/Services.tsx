@@ -10,8 +10,10 @@ import { Users, Building2, Hammer, Home, ShoppingBag, User, MapPin, Maximize2 } 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LandViewModal } from "@/components/LandViewModal";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Services = () => {
+  const { t } = useLanguage();
   const [profiles, setProfiles] = useState<any[]>([]);
   const [landListings, setLandListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -168,6 +170,71 @@ const Services = () => {
   const handleViewLandDetails = (land: any) => {
     setSelectedLand(land);
     setShowLandModal(true);
+  };
+
+  const handleChatWithOwner = async (ownerId: string) => {
+    if (!currentUserId) {
+      toast({
+        title: "Authentication Required",
+        description: "Please login to chat with the owner.",
+        variant: "destructive",
+      });
+      navigate("/auth?mode=login");
+      return;
+    }
+
+    if (currentUserId === ownerId) {
+      toast({
+        title: "Cannot Chat",
+        description: "You cannot chat with yourself.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Check if connection already exists
+      const { data: existingConnection } = await supabase
+        .from('connections')
+        .select('*')
+        .or(`and(requester_id.eq.${currentUserId},recipient_id.eq.${ownerId}),and(requester_id.eq.${ownerId},recipient_id.eq.${currentUserId})`)
+        .single();
+
+      if (existingConnection) {
+        // Connection exists, navigate to chat
+        setShowLandModal(false);
+        navigate(`/chat/${existingConnection.id}`);
+        return;
+      }
+
+      // Create new connection
+      const { data: newConnection, error } = await supabase
+        .from('connections')
+        .insert({
+          requester_id: currentUserId,
+          recipient_id: ownerId,
+          status: 'accepted', // Auto-accept for land owner chats
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Chat Started",
+        description: "You can now chat with the land owner.",
+      });
+
+      setShowLandModal(false);
+      navigate(`/chat/${newConnection.id}`);
+    } catch (err: any) {
+      console.error("Error starting chat:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to start chat. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderLandCard = (land: any) => (
@@ -484,13 +551,7 @@ const Services = () => {
           open={showLandModal}
           onOpenChange={setShowLandModal}
           land={selectedLand}
-          onChatWithOwner={() => {
-            // TODO: Implement chat with owner functionality
-            toast({
-              title: "Chat Feature",
-              description: "Chat with owner feature coming soon!",
-            });
-          }}
+          onChatWithOwner={() => handleChatWithOwner(selectedLand.owner_id)}
         />
       )}
     </div>

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Smile, Image as ImageIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Message {
   id: string;
@@ -46,19 +48,24 @@ const CIVILCONNECT_KNOWLEDGE = {
 };
 
 export const CivilConnectChatbot = () => {
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: CIVILCONNECT_KNOWLEDGE.greeting,
-      sender: "assistant",
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Initialize with greeting in current language
+  useEffect(() => {
+    setMessages([{
+      id: "1",
+      text: t('chatbotGreeting'),
+      sender: "assistant",
+      timestamp: new Date()
+    }]);
+  }, [language]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -68,28 +75,62 @@ export const CivilConnectChatbot = () => {
     scrollToBottom();
   }, [messages]);
 
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setInputValue(prev => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
   const generateResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
+    
+    // Language-specific responses
+    const responses = {
+      en: {
+        greeting: "Hello! 👋 Welcome to CivilConnect. I'm your assistant here to help you with anything related to our platform. What would you like to know?",
+        thankYou: "You're welcome! 😊 Feel free to ask if you need anything else about CivilConnect.",
+        whatIs: "CivilConnect is a professional platform that connects construction professionals with clients. We bring together:\n\n• Engineers for technical expertise\n• Architects for design services\n• Civil Workers for skilled labor\n• Contractors & Builders for complete projects\n• Land Owners for property listings\n• Material Sellers for construction supplies\n\nIt's your one-stop solution for all construction needs! What would you like to explore?",
+        signup: "Great! Here's how to create your CivilConnect account:\n\n1️⃣ Click the 'Sign Up' button in the top navigation\n2️⃣ Choose your role (Engineer, Architect, Worker, etc.)\n3️⃣ Fill in your details:\n   • Full name\n   • Email and password\n   • Location (city and state)\n   • Phone number\n4️⃣ Complete your professional profile\n5️⃣ Start connecting!\n\nNeed help with a specific step?",
+        default: "I'd love to help! Could you please tell me more about what you're looking for?\n\n💡 Popular topics:\n• How to sign up and create a profile\n• Finding and connecting with professionals\n• Using the chat system\n• Understanding ratings\n• Switching languages\n• Reporting issues\n\nOr just ask me anything about CivilConnect! 😊"
+      },
+      te: {
+        greeting: "నమస్కారం! 👋 CivilConnect కు స్వాగతం. మా ప్లాట్‌ఫారమ్‌కు సంబంధించిన ఏదైనా విషయంలో మీకు సహాయం చేయడానికి నేను మీ అసిస్టెంట్. మీరు ఏమి తెలుసుకోవాలనుకుంటున్నారు?",
+        thankYou: "మీకు స్వాగతం! 😊 CivilConnect గురించి మీకు ఇంకా ఏదైనా అవసరమైతే అడగడానికి సంకోచించకండి.",
+        whatIs: "CivilConnect అనేది నిర్మాణ నిపుణులను క్లయింట్‌లతో కనెక్ట్ చేసే ప్రొఫెషనల్ ప్లాట్‌ఫారమ్. మేము కలిపి తీసుకువస్తాము:\n\n• సాంకేతిక నైపుణ్యం కోసం ఇంజనీర్లు\n• డిజైన్ సేవల కోసం ఆర్కిటెక్ట్‌లు\n• నైపుణ్యం కలిగిన కార్మికుల కోసం సివిల్ వర్కర్లు\n• పూర్తి ప్రాజెక్ట్‌ల కోసం కాంట్రాక్టర్లు & బిల్డర్లు\n• ఆస్తి లిస్టింగ్‌ల కోసం భూ యజమానులు\n• నిర్మాణ సామగ్రి కోసం మెటీరియల్ విక్రేతలు\n\nఇది మీ అన్ని నిర్మాణ అవసరాలకు వన్-స్టాప్ సొల్యూషన్! మీరు ఏమి అన్వేషించాలనుకుంటున్నారు?",
+        signup: "గొప్ప! మీ CivilConnect ఖాతాను ఎలా సృష్టించాలో ఇక్కడ ఉంది:\n\n1️⃣ టాప్ నావిగేషన్‌లో 'సైన్ అప్' బటన్‌ను క్లిక్ చేయండి\n2️⃣ మీ పాత్రను ఎంచుకోండి (ఇంజనీర్, ఆర్కిటెక్ట్, వర్కర్, మొదలైనవి)\n3️⃣ మీ వివరాలను పూరించండి:\n   • పూర్తి పేరు\n   • ఇమెయిల్ మరియు పాస్‌వర్డ్\n   • లొకేషన్ (నగరం మరియు రాష్ట్రం)\n   • ఫోన్ నంబర్\n4️⃣ మీ ప్రొఫెషనల్ ప్రొఫైల్‌ను పూర్తి చేయండి\n5️⃣ కనెక్ట్ అవ్వడం ప్రారంభించండి!\n\nనిర్దిష్ట దశతో సహాయం కావాలా?",
+        default: "నేను సహాయం చేయాలనుకుంటున్నాను! మీరు ఏమి వెతుకుతున్నారో దయచేసి మరింత చెప్పగలరా?\n\n💡 ప్రసిద్ధ అంశాలు:\n• సైన్ అప్ చేయడం మరియు ప్రొఫైల్ సృష్టించడం ఎలా\n• ప్రొఫెషనల్స్‌ను కనుగొనడం మరియు కనెక్ట్ అవ్వడం\n• చాట్ సిస్టమ్‌ను ఉపయోగించడం\n• రేటింగ్‌లను అర్థం చేసుకోవడం\n• భాషలను మార్చడం\n• సమస్యలను నివేదించడం\n\nలేదా CivilConnect గురించి ఏదైనా అడగండి! 😊"
+      },
+      hi: {
+        greeting: "नमस्ते! 👋 CivilConnect में आपका स्वागत है। मैं आपका सहायक हूं और हमारे प्लेटफ़ॉर्म से संबंधित किसी भी चीज़ में आपकी मदद करने के लिए यहां हूं। आप क्या जानना चाहेंगे?",
+        thankYou: "आपका स्वागत है! 😊 यदि आपको CivilConnect के बारे में कुछ और चाहिए तो बेझिझक पूछें।",
+        whatIs: "CivilConnect एक पेशेवर प्लेटफ़ॉर्म है जो निर्माण पेशेवरों को ग्राहकों से जोड़ता है। हम एक साथ लाते हैं:\n\n• तकनीकी विशेषज्ञता के लिए इंजीनियर\n• डिज़ाइन सेवाओं के लिए आर्किटेक्ट\n• कुशल श्रम के लिए सिविल वर्कर\n• पूर्ण परियोजनाओं के लिए ठेकेदार और बिल्डर\n• संपत्ति लिस्टिंग के लिए भूमि मालिक\n• निर्माण सामग्री के लिए सामग्री विक्रेता\n\nयह आपकी सभी निर्माण आवश्यकताओं के लिए वन-स्टॉप समाधान है! आप क्या एक्सप्लोर करना चाहेंगे?",
+        signup: "बढ़िया! यहां बताया गया है कि अपना CivilConnect खाता कैसे बनाएं:\n\n1️⃣ शीर्ष नेविगेशन में 'साइन अप' बटन पर क्लिक करें\n2️⃣ अपनी भूमिका चुनें (इंजीनियर, आर्किटेक्ट, वर्कर, आदि)\n3️⃣ अपना विवरण भरें:\n   • पूरा नाम\n   • ईमेल और पासवर्ड\n   • स्थान (शहर और राज्य)\n   • फोन नंबर\n4️⃣ अपनी पेशेवर प्रोफ़ाइल पूरी करें\n5️⃣ कनेक्ट करना शुरू करें!\n\nकिसी विशिष्ट चरण में मदद चाहिए?",
+        default: "मैं मदद करना चाहूंगा! क्या आप कृपया मुझे बता सकते हैं कि आप क्या खोज रहे हैं?\n\n💡 लोकप्रिय विषय:\n• साइन अप कैसे करें और प्रोफ़ाइल बनाएं\n• पेशेवरों को ढूंढना और कनेक्ट करना\n• चैट सिस्टम का उपयोग करना\n• रेटिंग को समझना\n• भाषाएं बदलना\n• समस्याओं की रिपोर्ट करना\n\nया CivilConnect के बारे में कुछ भी पूछें! 😊"
+      }
+    };
+    
+    const langResponses = responses[language as keyof typeof responses] || responses.en;
 
-    // Greetings - More natural
-    if (lowerMessage.match(/^(hi|hello|hey|greetings|good morning|good evening|good afternoon|namaste)/)) {
-      return "Hello! 👋 Welcome to CivilConnect. I'm your assistant here to help you with anything related to our platform. What would you like to know?";
+    // Greetings - More natural (multi-language support)
+    if (lowerMessage.match(/^(hi|hello|hey|greetings|good morning|good evening|good afternoon|namaste|నమస్కారం|नमस्ते)/)) {
+      return langResponses.greeting;
     }
 
-    // Thank you
-    if (lowerMessage.includes("thank") || lowerMessage.includes("thanks")) {
-      return "You're welcome! 😊 Feel free to ask if you need anything else about CivilConnect.";
+    // Thank you (multi-language)
+    if (lowerMessage.includes("thank") || lowerMessage.includes("thanks") || lowerMessage.includes("ధన్యవాదాలు") || lowerMessage.includes("धन्यवाद")) {
+      return langResponses.thankYou;
     }
 
-    // What is CivilConnect
-    if (lowerMessage.includes("what is civilconnect") || lowerMessage.includes("about civilconnect") || lowerMessage.includes("tell me about")) {
-      return "CivilConnect is a professional platform that connects construction professionals with clients. We bring together:\n\n• Engineers for technical expertise\n• Architects for design services\n• Civil Workers for skilled labor\n• Contractors & Builders for complete projects\n• Land Owners for property listings\n• Material Sellers for construction supplies\n\nIt's your one-stop solution for all construction needs! What would you like to explore?";
+    // What is CivilConnect (multi-language)
+    if (lowerMessage.includes("what is civilconnect") || lowerMessage.includes("about civilconnect") || lowerMessage.includes("tell me about") ||
+        lowerMessage.includes("civilconnect అంటే ఏమిటి") || lowerMessage.includes("civilconnect क्या है")) {
+      return langResponses.whatIs;
     }
 
-    // Registration/Sign up - More variations
+    // Registration/Sign up (multi-language)
     if (lowerMessage.includes("sign up") || lowerMessage.includes("register") || lowerMessage.includes("create account") || 
-        lowerMessage.includes("join") || lowerMessage.includes("new account") || lowerMessage.includes("get started")) {
-      return "Great! Here's how to create your CivilConnect account:\n\n1️⃣ Click the 'Sign Up' button in the top navigation\n2️⃣ Choose your role (Engineer, Architect, Worker, etc.)\n3️⃣ Fill in your details:\n   • Full name\n   • Email and password\n   • Location (city and state)\n   • Phone number\n4️⃣ Complete your professional profile\n5️⃣ Start connecting!\n\nNeed help with a specific step?";
+        lowerMessage.includes("join") || lowerMessage.includes("new account") || lowerMessage.includes("get started") ||
+        lowerMessage.includes("సైన్ అప్") || lowerMessage.includes("रजिस्टर") || lowerMessage.includes("खाता बनाएं")) {
+      return langResponses.signup;
     }
 
     // Login issues
@@ -191,8 +232,8 @@ export const CivilConnectChatbot = () => {
       return "I appreciate your question, but I'm specifically designed to help with CivilConnect platform queries only. 😊\n\nI can help you with:\n• Platform features and navigation\n• Registration and profiles\n• Connecting with professionals\n• Technical issues\n• And much more about CivilConnect!\n\nWhat would you like to know about CivilConnect?";
     }
 
-    // Default - More friendly
-    return "I'd love to help! Could you please tell me more about what you're looking for?\n\n💡 Popular topics:\n• How to sign up and create a profile\n• Finding and connecting with professionals\n• Using the chat system\n• Understanding ratings\n• Switching languages\n• Reporting issues\n\nOr just ask me anything about CivilConnect! 😊";
+    // Default - More friendly (multi-language)
+    return langResponses.default;
   };
 
   const handleSend = () => {
@@ -316,7 +357,7 @@ export const CivilConnectChatbot = () => {
               </h3>
               <p className="text-sm text-white/80 flex items-center gap-1">
                 <span className="inline-block h-2 w-2 bg-green-400 rounded-full animate-pulse" />
-                Online • Ready to help
+                {t('readyToHelp')}
               </p>
             </div>
           </div>
@@ -330,7 +371,7 @@ export const CivilConnectChatbot = () => {
           </Button>
         </div>
         <p className="text-sm text-white/90 relative z-10">
-          💬 Ask me anything about CivilConnect - I'm here to help!
+          {t('howCanIHelp')}
         </p>
       </div>
 
@@ -386,28 +427,47 @@ export const CivilConnectChatbot = () => {
       </div>
 
       {/* Input Area */}
-      <div className="bg-gray-900 p-4 border-t border-gray-800">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="text-white hover:bg-gray-800 rounded-full flex-shrink-0">
-            <Smile className="h-5 w-5" />
-          </Button>
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Reply ..."
-            className="flex-1 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 rounded-full"
-          />
-          <Button variant="ghost" size="icon" className="text-white hover:bg-gray-800 rounded-full flex-shrink-0">
-            <ImageIcon className="h-5 w-5" />
-          </Button>
-          <Button
-            onClick={handleSend}
-            size="icon"
-            className="bg-blue-600 hover:bg-blue-700 rounded-full flex-shrink-0"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+      <div className="bg-gray-900 border-t border-gray-800 relative">
+        {/* Emoji Picker */}
+        {showEmojiPicker && (
+          <div className="absolute bottom-full left-0 mb-2 z-50">
+            <EmojiPicker
+              onEmojiClick={onEmojiClick}
+              width={320}
+              height={400}
+              theme="dark"
+            />
+          </div>
+        )}
+        
+        <div className="p-4">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white hover:bg-gray-800 rounded-full flex-shrink-0"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            >
+              <Smile className="h-5 w-5" />
+            </Button>
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={t('replyPlaceholder')}
+              className="flex-1 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 rounded-full"
+            />
+            <Button variant="ghost" size="icon" className="text-white hover:bg-gray-800 rounded-full flex-shrink-0">
+              <ImageIcon className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={handleSend}
+              size="icon"
+              className="bg-blue-600 hover:bg-blue-700 rounded-full flex-shrink-0"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -19,6 +19,7 @@ const CivilWorkers = () => {
   const [user, setUser] = useState<User | null>(null);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProfession, setSelectedProfession] = useState<string>("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,8 +31,8 @@ const CivilWorkers = () => {
       }
     };
     checkUser();
-    fetchWorkers();
-  }, []);
+    fetchWorkers(selectedProfession);
+  }, [selectedProfession]);
 
   const { setBackground } = useBackground();
 
@@ -41,13 +42,19 @@ const CivilWorkers = () => {
     return () => setBackground(null, false);
   }, [setBackground]);
 
-  const fetchWorkers = async () => {
+  const fetchWorkers = async (profession?: string) => {
     setLoading(true);
-    const { data: profiles } = await supabase
+    let query = supabase
       .from("profiles")
       .select("*, worker_profiles(*)")
-      .eq("user_type", "worker")
-      .limit(20);
+      .eq("user_type", "worker");
+
+    // Filter by profession if selected
+    if (profession && profession !== "all") {
+      query = query.eq("profession", profession);
+    }
+
+    const { data: profiles } = await query.limit(20);
 
     if (profiles) {
       setWorkers(profiles as CivilWorkerProfile[]);
@@ -117,6 +124,78 @@ const CivilWorkers = () => {
       </div>
 
       <div className="container mx-auto px-4 pb-12">
+        {/* Profession Filter Navigation */}
+        <div className="mb-8 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-4">
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant={selectedProfession === "all" ? "default" : "outline"}
+              onClick={() => setSelectedProfession("all")}
+              className={`font-semibold ${
+                selectedProfession === "all"
+                  ? "bg-primary text-white"
+                  : "bg-white/20 text-white border-white/30 hover:bg-white/30"
+              }`}
+            >
+              All Workers
+            </Button>
+            <Button
+              variant={selectedProfession === "plumber" ? "default" : "outline"}
+              onClick={() => setSelectedProfession("plumber")}
+              className={`font-semibold ${
+                selectedProfession === "plumber"
+                  ? "bg-primary text-white"
+                  : "bg-white/20 text-white border-white/30 hover:bg-white/30"
+              }`}
+            >
+              Plumbers
+            </Button>
+            <Button
+              variant={selectedProfession === "mason" ? "default" : "outline"}
+              onClick={() => setSelectedProfession("mason")}
+              className={`font-semibold ${
+                selectedProfession === "mason"
+                  ? "bg-primary text-white"
+                  : "bg-white/20 text-white border-white/30 hover:bg-white/30"
+              }`}
+            >
+              Masons
+            </Button>
+            <Button
+              variant={selectedProfession === "electrician" ? "default" : "outline"}
+              onClick={() => setSelectedProfession("electrician")}
+              className={`font-semibold ${
+                selectedProfession === "electrician"
+                  ? "bg-primary text-white"
+                  : "bg-white/20 text-white border-white/30 hover:bg-white/30"
+              }`}
+            >
+              Electricians
+            </Button>
+            <Button
+              variant={selectedProfession === "painter" ? "default" : "outline"}
+              onClick={() => setSelectedProfession("painter")}
+              className={`font-semibold ${
+                selectedProfession === "painter"
+                  ? "bg-primary text-white"
+                  : "bg-white/20 text-white border-white/30 hover:bg-white/30"
+              }`}
+            >
+              Painters
+            </Button>
+            <Button
+              variant={selectedProfession === "marble_worker" ? "default" : "outline"}
+              onClick={() => setSelectedProfession("marble_worker")}
+              className={`font-semibold ${
+                selectedProfession === "marble_worker"
+                  ? "bg-primary text-white"
+                  : "bg-white/20 text-white border-white/30 hover:bg-white/30"
+              }`}
+            >
+              Marble Workers
+            </Button>
+          </div>
+        </div>
+
         <div className="p-6">
           {loading ? (
             <div className="text-center py-20">

@@ -4,58 +4,61 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, Building2, Hammer, Home, ShoppingBag, TrendingUp, CheckCircle2, Star, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Index = () => {
+  const { t } = useLanguage();
+  
   const services = [
     {
       icon: Users,
-      title: "Engineers",
-      description: "Connect with certified civil engineers for your construction projects",
+      title: t('engineers'),
+      description: t('engineersDesc'),
       link: "/engineers",
     },
     {
       icon: Users,
-      title: "Civil Workers",
-      description: "Find skilled workers for construction and civil work",
+      title: t('civilWorkers'),
+      description: t('civilWorkersDesc'),
       link: "/civil-workers",
     },
     {
       icon: Building2,
-      title: "Architects",
-      description: "Professional architects for interior and exterior design",
+      title: t('architects'),
+      description: t('architectsDesc'),
       link: "/architects",
     },
     {
       icon: Hammer,
-      title: "Contractors & Builders",
-      description: "Complete construction solutions from start to finish",
+      title: t('contractorsBuilders'),
+      description: t('contractorsBuildersDesc'),
       link: "/contractors-builders",
     },
     {
       icon: Home,
-      title: "Land Records",
-      description: "Access verified land listings and property information",
+      title: t('landRecords'),
+      description: t('landRecordsDesc'),
       link: "/land-records",
     },
     {
       icon: ShoppingBag,
-      title: "Material Sellers",
-      description: "Quality construction materials from verified suppliers",
+      title: t('materialSellers'),
+      description: t('materialSellersDesc'),
       link: "/material-sellers",
     },
   ];
 
   const stats = [
-    { value: "5000+", label: "Professionals" },
-    { value: "1200+", label: "Projects Completed" },
-    { value: "500+", label: "Land Listings" },
-    { value: "4.8★", label: "Average Rating" },
+    { value: "5000+", label: t('professionals') },
+    { value: "1200+", label: t('projectsCompleted') },
+    { value: "500+", label: t('landListings') },
+    { value: "4.8★", label: t('averageRating') },
   ];
 
   const howItWorks = [
-    { step: "1", title: "Browse Services", description: "Explore engineers, architects, workers, and more" },
-    { step: "2", title: "Connect", description: "Send connection requests to professionals" },
-    { step: "3", title: "Build", description: "Start your construction project with confidence" },
+    { step: "1", title: t('browseServices'), description: t('browseServicesDesc') },
+    { step: "2", title: t('connectStep'), description: t('connectStepDesc') },
+    { step: "3", title: t('buildStep'), description: t('buildStepDesc') },
   ];
 
   return (
@@ -78,13 +81,12 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight drop-shadow-2xl">
-              <span className="text-blue-600 dark:text-blue-400 drop-shadow-lg">Professional Platform</span>
+              <span className="text-blue-600 dark:text-blue-400 drop-shadow-lg">{t('heroTitle')}</span>
               <br />
-              <span className="text-white/90 drop-shadow-lg">for Modern Construction</span>
+              <span className="text-white/90 drop-shadow-lg">{t('heroTitle2')}</span>
             </h1>
             <p className="text-lg md:text-xl text-foreground max-w-2xl mx-auto drop-shadow-lg">
-              Connect with engineers, architects, contractors, civil workers, and material suppliers 
-              all in one place. Build your dream project with trusted professionals.
+              {t('heroSubtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <Link to="/services" className="w-full sm:w-auto animate-bounce-attention">
@@ -94,7 +96,7 @@ const Index = () => {
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
                     <span className="animate-pulse">🚀</span>
-                    Explore Services
+                    {t('exploreServicesBtn')}
                     <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform duration-300 animate-bounce-subtle" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-primary via-blue-500 to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-shimmer" />
@@ -107,7 +109,7 @@ const Index = () => {
                   className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 border-2 border-primary/50 hover:border-primary bg-background/80 backdrop-blur hover:bg-primary/10 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 group"
                 >
                   <span className="flex items-center justify-center gap-2">
-                    Get Started Free
+                    {t('getStartedFree')}
                     <span className="inline-block group-hover:rotate-12 transition-transform duration-300">✨</span>
                   </span>
                 </Button>

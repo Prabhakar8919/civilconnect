@@ -133,24 +133,54 @@ const LandRecords = () => {
     }
   };
 
-  const handleChat = (ownerId: string, connectionId?: string) => {
+  const handleChat = async (ownerId: string) => {
     if (!user) {
       toast.error("Please login to chat with land owners");
       navigate("/auth");
       return;
     }
 
-    const { status, connectionId: connId } = getConnectionStatus(ownerId);
-    
-    if (status === 'accepted' && connId) {
-      navigate(`/chat/${connId}`);
-    } else if (status === 'pending') {
-      toast.error("Connection request is pending", {
-        description: "Please wait for the owner to accept your connection request before chatting.",
-      });
-    } else {
-      toast.error("Not connected", {
-        description: "You need to connect with the owner before you can chat. Click the Connect button first.",
+    if (user.id === ownerId) {
+      toast.error("Cannot chat with yourself");
+      return;
+    }
+
+    try {
+      // Check if connection already exists
+      const { data: existingConnection } = await supabase
+        .from('connections')
+        .select('*')
+        .or(`and(requester_id.eq.${user.id},recipient_id.eq.${ownerId}),and(requester_id.eq.${ownerId},recipient_id.eq.${user.id})`)
+        .single();
+
+      if (existingConnection) {
+        // Connection exists, navigate to chat
+        setShowLandModal(false);
+        navigate(`/chat/${existingConnection.id}`);
+        return;
+      }
+
+      // Create new connection
+      const { data: newConnection, error } = await supabase
+        .from('connections')
+        .insert({
+          requester_id: user.id,
+          recipient_id: ownerId,
+          status: 'accepted', // Auto-accept for land owner chats
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success("Chat started successfully!");
+
+      setShowLandModal(false);
+      navigate(`/chat/${newConnection.id}`);
+    } catch (err: any) {
+      console.error("Error starting chat:", err);
+      toast.error("Failed to start chat", {
+        description: err.message || "Please try again later.",
       });
     }
   };

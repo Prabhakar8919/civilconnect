@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building2, User, MapPin, Save, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "@/components/ImageUpload";
@@ -25,6 +26,8 @@ const ProfileEdit = () => {
     full_name: "",
     email: "",
     phone: "",
+    user_type: "",
+    profession: "",
     house_number: "",
     plot_number: "",
     street: "",
@@ -82,7 +85,9 @@ const ProfileEdit = () => {
       setProfile({
         full_name: profileData.full_name || "",
         email: profileData.email || "",
-        phone: profileData.phone || "",
+        phone: profileData.phone || profileData.phone_number || "",
+        user_type: profileData.user_type || "",
+        profession: profileData.profession || "",
         house_number: profileData.house_number || "",
         plot_number: profileData.plot_number || "",
         street: profileData.street || "",
@@ -116,6 +121,11 @@ const ProfileEdit = () => {
         bio: profile.bio,
         profile_image: profile.profile_image,
       };
+
+      // Add profession if user is a worker
+      if (profile.user_type === 'worker') {
+        updateData.profession = profile.profession;
+      }
 
       // Add optional fields only if they have values
       if (profile.phone) {
@@ -423,6 +433,39 @@ const ProfileEdit = () => {
                     />
                   </CardContent>
                 </Card>
+
+                {/* Profession Field - Only for Civil Workers */}
+                {profile.user_type === 'worker' && (
+                  <Card className="border-2 border-slate-200 dark:border-slate-700 shadow-lg bg-white dark:bg-slate-900">
+                    <CardHeader className="space-y-3 pb-6">
+                      <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                        Profession
+                      </CardTitle>
+                      <CardDescription className="text-base text-slate-600 dark:text-slate-400">
+                        Select your specific profession
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <Label htmlFor="profession" className="text-base font-bold text-slate-900 dark:text-slate-50">
+                          Your Profession <span className="text-red-600 dark:text-red-400">*</span>
+                        </Label>
+                        <Select value={profile.profession} onValueChange={(value) => setProfile({ ...profile, profession: value })}>
+                          <SelectTrigger className="h-12 text-base border-2 border-slate-300 dark:border-slate-600 focus:border-primary dark:focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50">
+                            <SelectValue placeholder="Select your profession" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="plumber">Plumber</SelectItem>
+                            <SelectItem value="mason">Mason</SelectItem>
+                            <SelectItem value="electrician">Electrician</SelectItem>
+                            <SelectItem value="painter">Painter</SelectItem>
+                            <SelectItem value="marble_worker">Marble Worker</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Professional Information Section */}
                 <Card className="border-2 border-slate-200 dark:border-slate-700 shadow-lg bg-white dark:bg-slate-900">

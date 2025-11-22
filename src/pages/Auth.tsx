@@ -25,6 +25,7 @@ const Auth = () => {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [userType, setUserType] = useState("");
+  const [profession, setProfession] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
   const [costPerSqft, setCostPerSqft] = useState("");
   const [totalProjects, setTotalProjects] = useState("");
@@ -121,10 +122,11 @@ const Auth = () => {
             id: authData.user.id,
             full_name: fullName,
             email: email,
-            phone_number: phoneNumber || null,
+            phone: phoneNumber || null,
             city: city || null,
             state: state || null,
             user_type: userType as Profile['user_type'],
+            profession: userType === 'worker' ? profession : null,
           };
 
           // Add bio for all non-land-owner users
@@ -381,6 +383,28 @@ const Auth = () => {
                         <SelectItem value="worker">Civil Worker</SelectItem>
                         <SelectItem value="material_seller">Material Seller</SelectItem>
                         <SelectItem value="land_owner">Land Owner</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Profession Field - Only for Civil Workers */}
+                {!isLogin && userType === 'worker' && (
+                  <div className="space-y-2 animate-slide-up" style={{ animationDelay: '0.35s' }}>
+                    <Label htmlFor="profession" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      Profession
+                    </Label>
+                    <Select value={profession} onValueChange={setProfession} required>
+                      <SelectTrigger className="border-border/50 focus:border-primary transition-all focus:shadow-lg focus:shadow-primary/20">
+                        <SelectValue placeholder="Select your profession" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="plumber">Plumber</SelectItem>
+                        <SelectItem value="mason">Mason</SelectItem>
+                        <SelectItem value="electrician">Electrician</SelectItem>
+                        <SelectItem value="painter">Painter</SelectItem>
+                        <SelectItem value="marble_worker">Marble Worker</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
